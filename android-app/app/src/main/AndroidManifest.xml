@@ -1,0 +1,55 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="tech.paycon.mobile_auth_sample">
+
+    <!-- This permission is required to establish the connection with PC Server -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- This permission is necessary for scanning QR-codes -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- These features must be included to the Manifest so that the app can scan QR-codes -->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- Make library for scanning QR codes compatible with Android 4.0 -->
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
+
+    <!--
+        hardwareAccelerated="true"  is necessary for TextureView while QR code scanning
+        android:allowBackup="false" is necessary to prevent auto backups because you are encouraged
+                                    to backup PC keys while special API from PC SDK
+        usesCleartextTraffic="true" is necessary if the app is supposed to use HTTP traffic
+                                    this sample app uses the traffic over HTTP
+                                                                                               -->
+    <application
+        android:name="tech.paycon.mobile_auth_sample.PCSampleApplication"
+        android:hardwareAccelerated="true"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="UnusedAttribute">
+
+        <activity
+            android:name="tech.paycon.mobile_auth_sample.mvvm.views.MainActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Override activity from com.journeyapps.barcodescanner library to prevent landscape
+        orientation -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
+
+    </application>
+
+</manifest>

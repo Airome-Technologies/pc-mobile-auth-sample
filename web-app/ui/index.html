@@ -1,0 +1,23 @@
+<html>
+
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="js/ui.js"></script>
+    </head>
+
+    <body>
+        <div>
+            <h1>Personalize Client App via QR-code</h1>
+            <input type="button" value="Create QR-code" onclick="create_pc_user_with_qr();"> <br/>
+
+			<!-- JS-script will insert a result in this fields -->
+            <div id="created_user" style="display: none;">
+                PC User ID: <span id="pc_user_id"></span> <br/>
+                PC User's Personalization QR: <br/>
+                <img id="pc_user_qr">
+            </div>
+			
+        </div>
+    </body>
+</html>

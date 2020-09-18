@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PC Sample App</string>
+
+    <string name="action_authenticate">Authenticate</string>
+    <string name="action_authenticated">Successfully authenticated</string>
+    <string name="action_authenticating">Authenticating…</string>
+    <string name="action_clear_logs">Clear logs</string>
+    <string name="action_personalize">Personalize</string>
+
+    <string name="label_log_placeholder">Essential information will be logged here…</string>
+</resources>

@@ -1,0 +1,23 @@
+<?php
+
+/**
+ *      Configuration file for the sample
+ */
+
+
+// PC API URL
+//    For demo purposes - request from Airome / SafeTech. For your own installation - use your own
+$pc_url = 'http://abs.net.local/pc-api';	// <--- sample value
+
+// PC system-id (see docs: https://repo.payconfirm.org/server/doc/v5/rest-api/#systems-endpoint)
+//    For demo purposes - request from Airome / SafeTech. For your own installation - use your own
+$system_id = '4474a630-db74-4f2e-bf69-8b66b5c5cadf';	// <--- sample value
+
+// Callback Receiver URL to receive callbacks from PC Server (see docs: https://repo.payconfirm.org/server/doc/v5/rest-api/#transactions-endpoint)
+//    For this sample must be address of pc_callback_reciever.php script
+$callback_receiver_url = 'http://abs.net.local/pc_samples/mobile_app_authentication/web-app/backend/pc_callback_reciever.php';	// <--- sample value
+
+// Include common functions
+include('common_functions.php');
+
+?>

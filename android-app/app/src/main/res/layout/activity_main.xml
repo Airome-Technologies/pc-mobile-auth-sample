@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorExtraLightGrey"
+    android:padding="8dp">
+
+    <Button
+        android:id="@+id/button_personalize"
+        android:layout_width="168dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_selector"
+        android:textColor="@color/colorWhile"
+        android:text="@string/action_personalize"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/button_authenticate"
+        android:layout_width="168dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_selector"
+        android:textColor="@color/colorWhile"
+        android:text="@string/action_authenticate"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginTop="24dp"
+        android:enabled="false"/>
+
+    <TextView
+        android:id="@+id/text_view_logs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="24dp"
+        android:padding="8dp"
+        android:background="@drawable/background_logs_view"
+        android:textColor="@color/colorAccent"
+        android:textSize="14sp"
+        android:text="@string/label_log_placeholder"
+        android:scrollbars="vertical"/>
+
+</LinearLayout>
