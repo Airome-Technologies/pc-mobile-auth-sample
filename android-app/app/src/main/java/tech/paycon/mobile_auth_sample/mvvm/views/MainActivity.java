@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             // Permission is auto-granted for device running Android older than M
             mIsCameraPermissionGranted = true;
         } else {
-            // For devices controlled by Android M and newer check if the permission is actually was granted
+            // For devices controlled by Android M and newer check if the permission is actually granted
             mIsCameraPermissionGranted =
                     checkSelfPermission("android.permission.CAMERA") == PackageManager.PERMISSION_GRANTED;
         }
@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         // Observe changes from ViewModel
 
         mBinding.textViewLogs.setMovementMethod(new ScrollingMovementMethod());
+
         mViewModel.getMessage().observe(this, text -> {
             if (text != null) {
                 logMessage(text, MessageType.Info);
@@ -150,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        mViewModel.init();
     }
 
     @Override

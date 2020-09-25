@@ -15,7 +15,7 @@
  *   - to handle PC Transaction it's better to use database, sessions and all of this stuff
  *   - to store transaction IDs in temporary file - it's just for sample purposes
  * 
- * After this script called, Mobile Device with PC SDK and personalized with specified PC User ID
+ * After this script has been called, Mobile Device with PC SDK and personalized with specified PC User ID
  * should confirm (digitally sign) created transaction
  * 
  * It will lead to callback from PC Server to pc_callback_reciever.php and changing status to

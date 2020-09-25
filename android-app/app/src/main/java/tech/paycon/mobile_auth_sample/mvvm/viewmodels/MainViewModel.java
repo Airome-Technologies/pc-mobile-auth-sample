@@ -13,6 +13,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 import tech.paycon.sdk.v5.PCConfirmation;
 import tech.paycon.sdk.v5.PCSDK;
@@ -134,6 +135,19 @@ public class MainViewModel extends ViewModel {
 
         }).start();
 
+    }
+
+    /**
+     * Performs initialization when the activity is first launched. Initialization includes the following steps:
+     *  - Checks if there are some PCUser objects stored on the device ( = app is personalized)
+     *  - If so, picks up the first PCUser in the list and enables authentication for him
+     */
+    public void init() {
+        List<PCUser> users = PCUsersManager.listStorage();
+        if (users.size() > 0) {
+            mUser = users.get(0);
+            getState().postValue(State.PersonalizationDone);
+        }
     }
 
     /**
