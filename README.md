@@ -33,7 +33,7 @@ Pre-requisites:
 Compilation process:
 1. open the project with Android Studio
 2. open `build.gradle` and replace in following block credentials with your username and password
-```json
+```gradle
 maven {
     url "https://repo.payconfirm.org/android/maven"
     credentials {
