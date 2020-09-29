@@ -16,7 +16,7 @@
  * 
  */
 
-include('config.php');
+include('../config.php');
 
 // read input JSON
 $php_input = file_get_contents('php://input');
@@ -25,7 +25,8 @@ $request = (array) json_decode($php_input, true);
 // check if pc_user_id is specified in the request
 if (!isset($request['pc_user_id'])) {
     header("HTTP/1.0 400 Bad Request", true, 400);
-    die();
+    header("Content-Type: application/json");
+    die(json_encode(array('error'=>'pc_user_id not specified')));
 }
 
 // Get PC User ID

@@ -5,6 +5,73 @@
  */
 
 /**
+ * Function to store Alias in tmp-file (like a database-replacement)
+ * see pers/activation_code scripts
+ * 
+ * @param String $alias Alias object
+ */
+ function store_alias($alias) {
+    global $storage_file;
+
+    if (file_exists($storage_file)) {
+        $storage = json_decode(file_get_contents($storage_file), true);
+    } else {
+        $storage = array();
+    }
+
+    // store alias
+    if (!isset($storage['aliases'])) {
+        $storage['aliases'] = array();
+    }
+
+    if (is_array($alias)) {
+        $storage['aliases'][array_keys($alias)[0]] = $alias[array_keys($alias)[0]];
+    } else {
+        $storage['aliases'][] = $alias;
+    }
+
+
+    file_put_contents($storage_file, json_encode($storage));
+ }
+
+ /**
+ * Function to get Alias from tmp-file (like a database-replacement)
+ * see pers/activation_code scripts
+ * 
+ * After Alias was returned - it will be removed to prevent duble-usage
+ * 
+ * @param String $alias Alias string
+ * 
+ * @return Object Alias object
+ */
+ function get_alias($alias) {
+    global $storage_file;
+
+    if (file_exists($storage_file)) {
+        $storage = json_decode(file_get_contents($storage_file), true);
+    } else {
+        return null;
+    }
+
+    // store alias
+    if (!isset($storage['aliases'])) {
+        return null;
+    }
+
+    if (!isset($storage['aliases'][$alias])) {
+        return null;
+    }  
+
+    $result = array($alias => $storage['aliases'][$alias]);
+
+    // remove this alias to prevent double-usage
+    unset($storage['aliases'][$alias]);
+    file_put_contents($storage_file, json_encode($storage));
+
+    return $result;
+ }
+
+/**
  * Function to store transaction info in tmp-file (like a database-replacement)
  * 
  * @param String $user_id PC User ID
@@ -13,7 +80,7 @@
  */
 
 function store_transaction_info($user_id, $transaction_id, $status) {
-    $storage_file = '/tmp/pc_sample_storage.json';
+    global $storage_file;
 
     if (file_exists($storage_file)) {
         $storage = json_decode(file_get_contents($storage_file), true);
@@ -41,7 +108,7 @@ function store_transaction_info($user_id, $transaction_id, $status) {
  * @return String Status, can be 'created', 'confirmed', 'declined'
  */
 function get_stored_transaction_info($user_id, $transaction_id) {
-    $storage_file = '/tmp/pc_sample_storage.json';
+    global $storage_file;
 
     if (file_exists($storage_file)) {
         $storage = json_decode(file_get_contents($storage_file), true);
@@ -135,6 +202,29 @@ function pc_request($url, $request, $expected_answer, &$result, &$error_descript
     }
 
     return true;
+}
+
+/**
+ * Function to generate random ASCII string
+ * 
+ * @param Int $length required length
+ * @param String $keyspace Set of chars
+ * 
+ * @return String Random string value
+ */
+function random_str(
+    int $length = 64,
+    string $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+): string {
+    if ($length < 1) {
+        throw new \RangeException("Length must be a positive integer");
+    }
+    $pieces = [];
+    $max = mb_strlen($keyspace, '8bit') - 1;
+    for ($i = 0; $i < $length; ++$i) {
+        $pieces []= $keyspace[random_int(0, $max)];
+    }
+    return implode('', $pieces);
 }
 
 ?>

@@ -1,23 +1,46 @@
 <html>
 
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="js/ui.js"></script>
-    </head>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/ui.js"></script>
+    <link href="./css/style.css" rel="stylesheet">
+</head>
 
-    <body>
-        <div>
-            <h1>Personalize Client App via QR-code</h1>
-            <input type="button" value="Create QR-code" onclick="create_pc_user_with_qr();"> <br/>
+<body>
+    <div>
+        <h1>Personalize Client App via QR-code</h1>
+        <input type="button" value="Create QR-code" onclick="create_pc_user_with_qr();"> <br/>
 
-			<!-- JS-script will insert a result in this fields -->
-            <div id="created_user" style="display: none;">
-                PC User ID: <span id="pc_user_id"></span> <br/>
-                PC User's Personalization QR: <br/>
-                <img id="pc_user_qr">
-            </div>
-			
+        <!-- JS-script will insert a result in this fields -->
+        <div id="created_user_qr" style="display: none;">
+            PC User ID: <span id="pc_user_id"></span> <br/> 
+            
+            PC User's Personalization QR: <br/>
+            <img id="pc_user_qr">
         </div>
-    </body>
+    </div>
+
+    <div>
+        <h1>Personalize Client App via Alias + Activation Code</h1>
+        <input type="button" value="Create Alias" onclick="create_alias();"> <br/>
+
+        <!-- JS-script will insert a result in this fields -->
+        <div id="created_user_alias" style="display: none;">
+            Alias: <span class="important" id="alias"></span> <br/>
+            Activation Code: <span class="important" id="activation_code"></span> <br/>
+
+            <br/><span class="warning">
+!!! WARNING !!! <br>
+    We create Activation Code here for DEMO PURPOSES ONLY <br>
+    You should create Activation Code at the moment when you requests key JSON from PC Server <br>
+    After you have created Activation Code you should send it to a user with another channel <br>
+    It can be email, SMS, push or something else <br>
+    <br>
+    We can not send SMS or something here in demo, that's why we create activation code here <br>
+            </span>
+        </div>
+    </div>
+</body>
+
 </html>

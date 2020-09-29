@@ -4,7 +4,6 @@
  *      Configuration file for the sample
  */
 
-
 // PC API URL
 //    For demo purposes - request from Airome / SafeTech. For your own installation - use your own
 $pc_url = 'http://abs.net.local/pc-api';	// <--- sample value
@@ -19,5 +18,8 @@ $callback_receiver_url = 'http://abs.net.local/pc_samples/mobile_app_authenticat
 
 // Include common functions
 include('common_functions.php');
+
+// Storage-file location (database-replacement)
+$storage_file = '/tmp/pc_sample_storage.json';
 
 ?>

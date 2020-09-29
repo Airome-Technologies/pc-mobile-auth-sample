@@ -5,7 +5,7 @@
  *      see https://repo.payconfirm.org/server/doc/v5/rest-api/#create-user
  */
 
-include('config.php');
+include('../../config.php');
 
 // Minimal create user params
 $create_user_params = array(
@@ -40,3 +40,5 @@ $result['user_qr'] = $user_info['key_QR'];
 
 header("Content-Type: application/json");
 print(json_encode($result));
+
+?>

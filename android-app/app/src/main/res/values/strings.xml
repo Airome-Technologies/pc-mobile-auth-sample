@@ -4,8 +4,18 @@
     <string name="action_authenticate">Authenticate</string>
     <string name="action_authenticated">Successfully authenticated</string>
     <string name="action_authenticating">Authenticating…</string>
+    <string name="action_cancel">Cancel</string>
     <string name="action_clear_logs">Clear logs</string>
-    <string name="action_personalize">Personalize</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_personalize_with_qr">With QR code</string>
+    <string name="action_personalize_with_alias">With alias</string>
+
+    <string name="hint_activation_code">Activation code</string>
+    <string name="hint_alias">Alias</string>
 
     <string name="label_log_placeholder">Essential information will be logged here…</string>
+    <string name="label_personalize">Personalize the app:</string>
+
+    <string name="title_activation_code">Enter activation code</string>
+    <string name="title_alias">Enter alias</string>
 </resources>

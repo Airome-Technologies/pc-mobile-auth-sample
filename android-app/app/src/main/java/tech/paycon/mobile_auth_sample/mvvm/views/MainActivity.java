@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -24,6 +25,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import tech.paycon.mobile_auth_sample.R;
 import tech.paycon.mobile_auth_sample.databinding.ActivityMainBinding;
+import tech.paycon.mobile_auth_sample.databinding.DialogPersonalizationBinding;
 import tech.paycon.mobile_auth_sample.mvvm.viewmodels.MainViewModel;
 
 import java.text.SimpleDateFormat;
@@ -85,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
                     checkSelfPermission("android.permission.CAMERA") == PackageManager.PERMISSION_GRANTED;
         }
 
-        // Initialize button for personalization
-        mBinding.buttonPersonalize.setOnClickListener(v -> {
+        // Initialize button for personalization with QR code
+        mBinding.buttonPersonalizeWithQr.setOnClickListener(v -> {
             if (mIsCameraPermissionGranted) {
                 // Camera can be used - scan QR-code with key information
                 openQRCodeScanner();
@@ -95,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{"android.permission.CAMERA"}, REQUEST_CODE_CAMERA_PERMISSION);
             }
         });
+
+        // Initialize button for personalization with alias
+        mBinding.buttonPersonalizeWithAlias.setOnClickListener(v -> openDialogForAlias());
 
         // Observe changes from ViewModel
 
@@ -121,6 +126,12 @@ public class MainActivity extends AppCompatActivity {
         mViewModel.getState().observe(this, state -> {
             if (state != null) {
                 switch (state) {
+
+                    case ActivationCodeRequired:
+                        // Personalization requires activation code
+                        openDialogForActivationCode();
+                        break;
+
                     case PersonalizationDone:
                         // Application has been personalized successfully
                         logMessage("The app is now personalized and you can authenticate", MessageType.Success);
@@ -238,5 +249,41 @@ public class MainActivity extends AppCompatActivity {
                     - mBinding.textViewLogs.getBottom() + mBinding.textViewLogs.getTop();
             mBinding.textViewLogs.scrollTo(0, Math.max(scrollAmount, 0));
         });
+    }
+
+    /**
+     * Opens the dialog to enter an alias and start personalization
+     */
+    private void openDialogForAlias() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        DialogPersonalizationBinding binding = DialogPersonalizationBinding.inflate(getLayoutInflater());
+        binding.labelTitle.setText(R.string.title_alias);
+        binding.edittextValue.setHint(R.string.hint_alias);
+        builder.setView(binding.getRoot())
+                .setCancelable(true)
+                .setNegativeButton(R.string.action_cancel, (d, i) -> d.cancel())
+                .setPositiveButton(R.string.action_continue, (d, i) -> {
+                    d.dismiss();
+                    mViewModel.submitAlias(binding.edittextValue.getText().toString());
+                })
+                .show();
+    }
+
+    /**
+     * Opens the dialog to enter an activation code and finish personalization
+     */
+    private void openDialogForActivationCode() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        DialogPersonalizationBinding binding = DialogPersonalizationBinding.inflate(getLayoutInflater());
+        binding.labelTitle.setText(R.string.title_activation_code);
+        binding.edittextValue.setHint(R.string.hint_activation_code);
+        builder.setView(binding.getRoot())
+                .setCancelable(true)
+                .setNegativeButton(R.string.action_cancel, (d, i) -> d.cancel())
+                .setPositiveButton(R.string.action_continue, (d, i) -> {
+                    d.dismiss();
+                    mViewModel.submitActivationCode(binding.edittextValue.getText().toString());
+                })
+                .show();
     }
 }

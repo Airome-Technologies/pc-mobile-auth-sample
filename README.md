@@ -22,7 +22,7 @@ Pre-requisites:
 
 Installation process:
 1. copy content of `web-app` directory to your web-server
-2. rename `config.php.template` to `config.php`
+2. rename ``web-app/config.php.template` to `web-app/config.php`
 3. fill values in `config.php` regarding comments
 
 ### Mobile App
@@ -47,23 +47,28 @@ maven {
 
 ## How to use
 1. in your browser go to `<your server address>/web-app/ui/`
-2. press `Create QR-code` button
-3. if you have configured web-app correctly, you will see User ID and QR-code from PC
+2. press `Create QR-code` or `Create Alias` button
+3. if you have configured web-app correctly, you will see
+   - User ID and QR-code from PC or
+   - Alias and Activation Code
 4. launch mobile app
-5. press `Personalize` button on the main screen and scan the QR-code
+5. choose `Personalization` option on the main screen (`with QR-code` or `with Alias`)
+6. Follow instructions
 
 After this step your mobile application is personalized
 
-6. press `Authenticate` button on the main screen
-7. you will see authentication process and result in the app's log
+7. press `Authenticate` button on the main screen
+8. you will see authentication process and result in the app's log
 
 ## Process description
-1. Personalization is made by standard PC scenario with QR-code only (see [docs here](https://repo.payconfirm.org/server/doc/v5/arch_and_principles/#mobile-app-personalization-and-keys-generation))
+1. Personalization is made by standard PC scenarios
+   - with QR-code only (see [docs here](https://repo.payconfirm.org/server/doc/v5/arch_and_principles/#mobile-app-personalization-and-keys-generation))
+   - with Exported JSON, passed via sample web-app - Automatically (see [docs here](https://repo.payconfirm.org/server/doc/v5/arch_and_principles/#mobile-app-personalization-and-keys-generation))
 
 2. Authentication process
-   - mobile-app -> backend/start_authentication.php - send user id to be authenticated
-   - backend/start_authentication.php -> PC Server - create transaction (see [docs here](https://repo.payconfirm.org/server/doc/v5/rest-api/#create-transaction))
+   - mobile-app -> backend/auth/start_authentication.php - send user id to be authenticated
+   - backend/auth/start_authentication.php -> PC Server - create transaction (see [docs here](https://repo.payconfirm.org/server/doc/v5/rest-api/#create-transaction))
    - mobile-app -> PC Server - confirm (digitally sign) transaction (see [docs here](https://repo.payconfirm.org/android/doc/5.x/getting_started/#transaction-confirmation-and-declination))
    - PC Server -> backend/pc_callback_receiver.php - callback with event 'transaction confirmed' or error (see [docs here](https://repo.payconfirm.org/server/doc/v5/rest-api/#transactions-endpoint))
-   - mobile-app -> backend/finish_authentication.php - "what about my authentication?"
-   - backend/finish_authentication.php -> mobile-app - if PC transaction has been confirmed, then authorize (grant permissions)
+   - mobile-app -> backend/auth/finish_authentication.php - "what about my authentication?"
+   - backend/auth/finish_authentication.php -> mobile-app - if PC transaction has been confirmed, then authorize (grant permissions)

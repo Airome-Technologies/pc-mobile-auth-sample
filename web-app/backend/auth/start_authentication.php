@@ -31,7 +31,7 @@
  *    {"pc_user_id":"sample-e7315c7d-7176-4431-a3f7-5343f2f86146"}
  */
 
-include('config.php');
+include('../config.php');
 
 // read input JSON
 $php_input = file_get_contents('php://input');
@@ -40,7 +40,8 @@ $request = (array) json_decode($php_input, true);
 // check if pc_user_id is specified in the request
 if (!isset($request['pc_user_id'])) {
     header("HTTP/1.0 400 Bad Request", true, 400);
-    die();
+    header("Content-Type: application/json");
+    die(json_encode(array('error'=>'pc_user_id not specified')));
 }
 
 // Get PC User ID
@@ -72,7 +73,8 @@ if (!pc_request(
 )) {
     // if error - die
     header("HTTP/1.1 500 Internal request failed", true, 500);
-    die("Call to PC failed. Error code: " .$error_code .", error description: " .$error_description);
+    header("Content-Type: application/json");
+    die(json_encode(array('error'=>"Call to PC failed. Error code: " .$error_code .", error description: " .$error_description)));
 }
 
 // get transaction id

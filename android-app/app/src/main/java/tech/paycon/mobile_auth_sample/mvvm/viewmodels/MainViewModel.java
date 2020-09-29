@@ -5,10 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import org.json.JSONObject;
+
 import tech.paycon.mobile_auth_sample.Constants;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -39,6 +43,12 @@ public class MainViewModel extends ViewModel {
      * Set of changeable states can be used to control the application logic
      */
     public enum State {
+
+        /**
+         * State that comes when performing personalization with alias after the server returned key information
+         * and the key must be activated
+         */
+        ActivationCodeRequired,
 
         /**
          * State that comes after personalization is successfully performed
@@ -138,6 +148,61 @@ public class MainViewModel extends ViewModel {
     }
 
     /**
+     * Sends alias to the server to get key information
+     * @param alias Alias value
+     */
+    public void submitAlias(@Nullable String alias) {
+        if (alias == null || alias.isEmpty()) {
+            getError().postValue("Alias value must be provided");
+            return;
+        }
+        // Perform request in separate thread
+        new Thread(() -> {
+            getMessage().postValue("Started personalization with alias \"" + alias + "\"");
+            String body = "{\"alias\":\"" + alias + "\"}";
+            Response response = performPlainRequest(Constants.URL_TO_WEBAPP_BACKEND + "/pers/alias/get_pc_user.php", body);
+            if (response == null || response.code != 200) {
+                getError().postValue("Personalization with alias failed");
+                return;
+            }
+            getMessage().postValue("Parsing result...");
+            try {
+                JSONObject object = new JSONObject(response.body);
+                String keyJson = object.getString("key_json");
+                // Try to import PCUser from received JSON
+                mUser = PCUsersManager.importUser(keyJson);
+                if (mUser == null) {
+                    getError().postValue("Cannot import PCUser from server response");
+                } else {
+                    getState().postValue(State.ActivationCodeRequired);
+                }
+            } catch (Exception e) {
+                getError().postValue("Caught exception while parsing server response: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    /**
+     * Submits activation code and finishes the personalization
+     * @param activationCode    Activation code value
+     */
+    public void submitActivationCode(@Nullable String activationCode) {
+        if (activationCode == null || activationCode.isEmpty()) {
+            getError().postValue("Activation code must be provided");
+            return;
+        }
+        // Try activate user
+        int result = PCUsersManager.activate(mUser, activationCode);
+        if (result != PCError.PC_ERROR_OK) {
+            getError().postValue("Key was not activated: " + new PCError(result).getMessage());
+            mUser = null;
+        } else {
+            getSuccess().postValue("Key activated successfully");
+            personalize();
+        }
+    }
+
+    /**
      * Performs initialization when the activity is first launched. Initialization includes the following steps:
      *  - Checks if there are some PCUser objects stored on the device ( = app is personalized)
      *  - If so, picks up the first PCUser in the list and enables authentication for him
@@ -159,18 +224,6 @@ public class MainViewModel extends ViewModel {
         // personalization. In real app this must not be performed
         for (PCUser user: PCUsersManager.listStorage()) {
             getMessage().postValue("Removed key " + user.getName() + " from storage: " + PCUsersManager.delete(user));
-        }
-
-        // Check that the user is activated
-        if (!mUser.isActivated()) {
-            // If your app is designed to work with keys that require activation, prompt activation code
-            // from the client here
-            int result = PCUsersManager.activate(mUser, "<<< Digital activation code entered by client >>>");
-            if (result != PCError.PC_ERROR_OK) {
-                // Key was not saved, handle the error
-                getError().postValue("PCUser was not activated: " + new PCError(result).getMessage());
-                return;
-            }
         }
 
         // Store PCUser with some password and name
@@ -214,11 +267,18 @@ public class MainViewModel extends ViewModel {
     public void authenticate() {
         // Use separate thread to perform network requests
         new Thread(() -> {
+            // Take first stored key for authentication
+            List<PCUser> users = PCUsersManager.listStorage();
+            if (users.size() == 0) {
+                getError().postValue("No keys found to perform authentication");
+                return;
+            }
+            mUser = users.get(0);
             // STEP 1. Create a sample authentication request
             getMessage().postValue("STEP 1. Creating sample authentication request...");
             String body = "{\"pc_user_id\":\"" + mUser.getUserId() + "\"}";
-            int result = performPlainRequest(Constants.URL_TO_WEBAPP_BACKEND + "/start_authentication.php", body);
-            if (result != 200) {
+            Response response = performPlainRequest(Constants.URL_TO_WEBAPP_BACKEND + "/auth/start_authentication.php", body);
+            if (response == null || response.code != 200) {
                 getError().postValue("Request failed, cannot continue");
                 getState().postValue(State.AuthenticationFailed);
                 return;
@@ -305,8 +365,8 @@ public class MainViewModel extends ViewModel {
                     // STEP 5. Finishing authentication
                     getMessage().postValue("STEP 5. Finishing authentication...");
                     String body = "{\"pc_user_id\":\"" + mUser.getUserId() + "\"}";
-                    int result = performPlainRequest(Constants.URL_TO_WEBAPP_BACKEND + "/finish_authentication.php", body);
-                    if (result != 200) {
+                    Response response = performPlainRequest(Constants.URL_TO_WEBAPP_BACKEND + "/auth/finish_authentication.php", body);
+                    if (response == null || response.code != 200) {
                         getError().postValue("Authentication was not finished");
                         getState().postValue(State.AuthenticationFailed);
                     } else {
@@ -328,10 +388,12 @@ public class MainViewModel extends ViewModel {
      * Auxiliary method to perform simple post request with body which contains data in JSON format
      * @param urlAddress    Target URL
      * @param jsonBody      JSON body
-     * @return  Response code
+     * @return  Response object including HTTP response code and response body
      */
-    private int performPlainRequest(String urlAddress, String jsonBody) {
+    @Nullable
+    private Response performPlainRequest(@NonNull String urlAddress, @NonNull String jsonBody) {
         try {
+            Response response = new Response();
             getMessage().postValue("Connecting to: " + urlAddress);
             URL url = new URL(urlAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -342,7 +404,7 @@ public class MainViewModel extends ViewModel {
             connection.setReadTimeout(20000);
             // Write body
             getMessage().postValue("Sending data: " + jsonBody);
-            if (jsonBody != null && !jsonBody.isEmpty()) {
+            if (!jsonBody.isEmpty()) {
                 DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));
                 writer.write(jsonBody);
@@ -354,11 +416,23 @@ public class MainViewModel extends ViewModel {
             int responseCode = connection.getResponseCode();
             String responseMessage = connection.getResponseMessage();
             getMessage().postValue("Received response: " + responseCode + " " + responseMessage);
-            return responseCode;
+            response.code = responseCode;
+            // Save response body
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4 * 1024];
+            int length;
+            InputStream is = responseCode == 200 ? connection.getInputStream() : connection.getErrorStream();
+            while ((length = is.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            response.body = result.toString("UTF-8");
+            getMessage().postValue("Response body: " + response.body);
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
-            getError().postValue("Caught exception while trying to perform post request: " + e.getMessage());
-            return -1;
+            getError().postValue("Caught " + e.getClass().getSimpleName()
+                    + " while trying to perform post request: " + e.getMessage());
+            return null;
         }
     }
 
@@ -377,6 +451,22 @@ public class MainViewModel extends ViewModel {
             text += (text.isEmpty() ? "" : "; ") + netError.getMessage();
         }
         return text;
+    }
+
+    /**
+     * Auxiliary class which contains response from the server
+     */
+    private static class Response {
+
+        /**
+         * HTTP response code
+         */
+        public int code;
+
+        /**
+         * Response body
+         */
+        public String body;
     }
 
 }
