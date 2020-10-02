@@ -16,6 +16,5 @@
     <string name="label_log_placeholder">Essential information will be logged here…</string>
     <string name="label_personalize">Personalize the app:</string>
 
-    <string name="title_activation_code">Enter activation code</string>
-    <string name="title_alias">Enter alias</string>
+    <string name="title_alias_and_activation_code">Enter alias and activation code</string>
 </resources>

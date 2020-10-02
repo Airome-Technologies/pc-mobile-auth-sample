@@ -45,12 +45,6 @@ public class MainViewModel extends ViewModel {
     public enum State {
 
         /**
-         * State that comes when performing personalization with alias after the server returned key information
-         * and the key must be activated
-         */
-        ActivationCodeRequired,
-
-        /**
          * State that comes after personalization is successfully performed
          */
         PersonalizationDone,
@@ -151,9 +145,13 @@ public class MainViewModel extends ViewModel {
      * Sends alias to the server to get key information
      * @param alias Alias value
      */
-    public void submitAlias(@Nullable String alias) {
+    public void submitAliasAndActivationCode(@Nullable String alias, @Nullable String activationCode) {
         if (alias == null || alias.isEmpty()) {
             getError().postValue("Alias value must be provided");
+            return;
+        }
+        if (activationCode == null || activationCode.isEmpty()) {
+            getError().postValue("Activation code must be provided");
             return;
         }
         // Perform request in separate thread
@@ -174,32 +172,20 @@ public class MainViewModel extends ViewModel {
                 if (mUser == null) {
                     getError().postValue("Cannot import PCUser from server response");
                 } else {
-                    getState().postValue(State.ActivationCodeRequired);
+                    // Try activate user
+                    int result = PCUsersManager.activate(mUser, activationCode);
+                    if (result != PCError.PC_ERROR_OK) {
+                        getError().postValue("Key was not activated: " + new PCError(result).getMessage());
+                        mUser = null;
+                    } else {
+                        getSuccess().postValue("Key activated successfully");
+                        personalize();
+                    }
                 }
             } catch (Exception e) {
                 getError().postValue("Caught exception while parsing server response: " + e.getMessage());
             }
         }).start();
-    }
-
-    /**
-     * Submits activation code and finishes the personalization
-     * @param activationCode    Activation code value
-     */
-    public void submitActivationCode(@Nullable String activationCode) {
-        if (activationCode == null || activationCode.isEmpty()) {
-            getError().postValue("Activation code must be provided");
-            return;
-        }
-        // Try activate user
-        int result = PCUsersManager.activate(mUser, activationCode);
-        if (result != PCError.PC_ERROR_OK) {
-            getError().postValue("Key was not activated: " + new PCError(result).getMessage());
-            mUser = null;
-        } else {
-            getSuccess().postValue("Key activated successfully");
-            personalize();
-        }
     }
 
     /**

@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize button for personalization with alias
-        mBinding.buttonPersonalizeWithAlias.setOnClickListener(v -> openDialogForAlias());
+        mBinding.buttonPersonalizeWithAlias.setOnClickListener(v -> openDialogForPersonalization());
 
         // Observe changes from ViewModel
 
@@ -126,11 +126,6 @@ public class MainActivity extends AppCompatActivity {
         mViewModel.getState().observe(this, state -> {
             if (state != null) {
                 switch (state) {
-
-                    case ActivationCodeRequired:
-                        // Personalization requires activation code
-                        openDialogForActivationCode();
-                        break;
 
                     case PersonalizationDone:
                         // Application has been personalized successfully
@@ -252,37 +247,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the dialog to enter an alias and start personalization
+     * Opens the dialog to enter an alias and activation code in order to start personalization
      */
-    private void openDialogForAlias() {
+    private void openDialogForPersonalization() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         DialogPersonalizationBinding binding = DialogPersonalizationBinding.inflate(getLayoutInflater());
-        binding.labelTitle.setText(R.string.title_alias);
-        binding.edittextValue.setHint(R.string.hint_alias);
         builder.setView(binding.getRoot())
                 .setCancelable(true)
                 .setNegativeButton(R.string.action_cancel, (d, i) -> d.cancel())
                 .setPositiveButton(R.string.action_continue, (d, i) -> {
                     d.dismiss();
-                    mViewModel.submitAlias(binding.edittextValue.getText().toString());
-                })
-                .show();
-    }
-
-    /**
-     * Opens the dialog to enter an activation code and finish personalization
-     */
-    private void openDialogForActivationCode() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        DialogPersonalizationBinding binding = DialogPersonalizationBinding.inflate(getLayoutInflater());
-        binding.labelTitle.setText(R.string.title_activation_code);
-        binding.edittextValue.setHint(R.string.hint_activation_code);
-        builder.setView(binding.getRoot())
-                .setCancelable(true)
-                .setNegativeButton(R.string.action_cancel, (d, i) -> d.cancel())
-                .setPositiveButton(R.string.action_continue, (d, i) -> {
-                    d.dismiss();
-                    mViewModel.submitActivationCode(binding.edittextValue.getText().toString());
+                    mViewModel.submitAliasAndActivationCode(binding.edittextAlias.getText().toString(),
+                            binding.edittextActivationCode.getText().toString());
                 })
                 .show();
     }
