@@ -35,20 +35,41 @@ if (!isset($request['alias'])) {
 
 $alias_value = $request['alias'];
 
-// check if alias value was created earlier (stored in tmp-file) and get activation_code
-$alias = get_alias($alias_value);
+// check if alias value was created earlier (stored in tmp-file)
+$alias = get_alias($alias_value)[$alias_value];
 if (null == $alias) {
     header("HTTP/1.0 400 Bad Request", true, 400);
     header("Content-Type: application/json");
     die(json_encode(array('error'=>'alias not found')));
 }
 
-// Minimal create user params
-$create_user_params = array(
-    'id_prefix' => 'sample-',
-    'key_encryption_password' => $alias[$alias_value],  // activation code
-    'return_key_method' => 'KEY_JSON'
-);
+// check if the alias already has been used and it has corresponded PC User ID
+if (null != $alias['pc_user_id']) {
+    // if pc_user_id has been set, then we call PC User Update
+    $pc_request_url = $pc_url ."/" .$system_id ."/users/" .$alias['pc_user_id'] ."/key";    // update PC User endpoint
+
+    // Minimal update user params
+    $pc_request_params = array(
+        'key_encryption_password' => $alias['activation_code'],  // activation code
+        'return_key_method' => 'KEY_JSON'
+    );
+
+    $pc_expected_answer = 'key_updated';   // expected answer from PC Server
+
+} else {
+    // if pc_user_id has been not set, then we create PC User
+
+    $pc_request_url = $pc_url ."/" .$system_id ."/users";   // create PC User endpoind
+
+    // Minimal create user params
+    $pc_request_params = array(
+        'id_prefix' => 'sample-',
+        'key_encryption_password' => $alias['activation_code'],  // activation code
+        'return_key_method' => 'KEY_JSON'
+    );
+
+    $pc_expected_answer = 'user_created';   // expected answer from PC Server
+}
 
 // !!! WARNING - we use stored Activation Code for DEMO PURPOSES ONLY
 //     You should create Activation Code at the moment when you requests key JSON from PC Server
@@ -59,16 +80,13 @@ $create_user_params = array(
 //     We can not send SMS or something here in demo, that's why we use stored activation code
 
 // encode params to JSON
-$data_string = json_encode($create_user_params);
-
-// build request url
-$register_user_url = $pc_url ."/" .$system_id ."/users";
+$data_string = json_encode($pc_request_params);
 
 // make a request
 if (!pc_request(
-    $register_user_url,
+    $pc_request_url,
     $data_string,
-    'user_created',
+    $pc_expected_answer,
     $user_info,
     $error_description,
     $error_code
@@ -78,11 +96,20 @@ if (!pc_request(
     die("Call to PC failed. Error code: " .$error_code .", error description: " .$error_description);
 }
 
+// store PC User ID to alias value
+if ($persistent_alias) {
+    $updated_alias = array($alias_value => array(
+        "activation_code" => $alias['activation_code'],
+        "pc_user_id" => $user_info['user_id'])
+    );
+    store_alias($updated_alias);
+}
+
 // Format and return the result
 $result = array();
 $result['user_id'] = $user_info['user_id'];
 $result['key_json'] = $user_info['key_json'];
-$result['activation_code'] = $alias[$alias_value];
+$result['activation_code'] = $alias['activation_code'];
 
 header("Content-Type: application/json");
 print(json_encode($result));

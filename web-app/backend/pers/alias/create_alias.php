@@ -33,11 +33,15 @@ $alias_value = random_str(8, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 $activation_code = random_str(10, "0123456789abcdefghijklmnopqrstuvwxyz");
 
-// store Alias and activation code to tmp-file
+// store Alias, activation code and PC User ID for the alias to tmp-file
 //   In real Application you should
 //     - use database
 //     - DO NOT STORE ACTIVATION CODE, see comment above
-$alias = array($alias_value => $activation_code);
+$alias = array($alias_value => array(
+                    "activation_code" => $activation_code,
+                    "pc_user_id" => NULL)   // null, because of there is no PC User ID for now. It will be created in get_pc_user.php
+         );
+
 store_alias($alias);
 
 // Format and return the result

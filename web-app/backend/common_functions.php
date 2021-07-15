@@ -53,19 +53,23 @@
         return null;
     }
 
-    // store alias
+    // check if there are stored aliases
     if (!isset($storage['aliases'])) {
         return null;
     }
 
+    // check if there is $alias in storage
     if (!isset($storage['aliases'][$alias])) {
         return null;
     }  
 
     $result = array($alias => $storage['aliases'][$alias]);
 
-    // remove this alias to prevent double-usage
-    unset($storage['aliases'][$alias]);
+    // if there is not persistent_alias, then remove this alias to prevent double-usage
+    if (!$persistent_alias)
+        unset($storage['aliases'][$alias]);
+
+    // re-store aliases
     file_put_contents($storage_file, json_encode($storage));
 
     return $result;

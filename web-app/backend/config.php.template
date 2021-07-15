@@ -16,6 +16,9 @@ $system_id = '4474a630-db74-4f2e-bf69-8b66b5c5cadf';	// <--- sample value
 //    For this sample must be address of pc_callback_reciever.php script
 $callback_receiver_url = 'http://abs.net.local/pc_samples/mobile_app_authentication/web-app/backend/pc_callback_reciever.php';	// <--- sample value
 
+// Make alias and activation code persistent
+$persistent_alias = true;
+
 // Include common functions
 include('common_functions.php');
 
