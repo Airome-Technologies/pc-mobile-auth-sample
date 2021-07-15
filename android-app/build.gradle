@@ -19,10 +19,6 @@ allprojects {
 
         maven {
             url "https://repo.payconfirm.org/android/maven"
-            credentials {
-                username = " <<< get from safetech/airome >>> "
-                password = " <<< get from safetech/airome >>> "
-            }
         }
     }
 }

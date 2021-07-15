@@ -36,10 +36,6 @@ Compilation process:
 ```gradle
 maven {
     url "https://repo.payconfirm.org/android/maven"
-    credentials {
-        username = " <<< get from safetech/airome >>> "
-        password = " <<< get from safetech/airome >>> "
-    }
 }
 ```
 3. open `app/src/main/java/tech/paycon/mobile_auth_sample/Constants.java` and fill values regarding comments
